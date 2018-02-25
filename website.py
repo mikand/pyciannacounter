@@ -51,5 +51,24 @@ def new_period(start, end, workplace):
     db.session.commit()
     return str(p.id)
 
+@app.route('/chperiod/<int:id_>/<int:start>/<int:end>')
+def change_period(id_, start, end):
+    p = WorkPeriod.query.filter_by(id=id_).first()
+    p.start = datetime.fromtimestamp(start)
+    p.end = datetime.fromtimestamp(end)
+    db.session.add(p)
+    db.session.commit()
+    return "OK"
+
+@app.route('/editperiod/<int:id_>/<int:start>/<int:end>/<string:workplace>')
+def edit_period(id_, start, end, workplace):
+    p = WorkPeriod.query.filter_by(id=id_).first()
+    p.start = datetime.fromtimestamp(start)
+    p.end = datetime.fromtimestamp(end)
+    p.workplace = workplace
+    db.session.add(p)
+    db.session.commit()
+    return "OK"
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
