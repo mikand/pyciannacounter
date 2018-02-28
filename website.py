@@ -70,5 +70,12 @@ def edit_period(id_, start, end, workplace):
     db.session.commit()
     return "OK"
 
+@app.route('/rmperiod/<int:id_>')
+def remove_period(id_):
+    p = WorkPeriod.query.filter_by(id=id_).first()
+    db.session.delete(p)
+    db.session.commit()
+    return "OK"
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

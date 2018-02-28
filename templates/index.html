@@ -21,10 +21,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
 
-    <!-- bootstrap-timepicker -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/css/bootstrap-timepicker.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-timepicker/0.5.2/js/bootstrap-timepicker.min.js"></script>
-
     <script>
       var allEvents = [
       {%for wp in work_periods%}
@@ -42,21 +38,29 @@
     <script src="{{url_for('static', filename='calendar.js')}}"></script>
   </head>
   <body>
+    <div class="container">
+      <div id="calendar"></div>
 
-    <div id='calendar'></div>
+      <div id="controls">
+        <div class="btn-group" role="group" aria-label="Basic example">
+          <button type="button" class="btn btn-default" id="btnCopyWeek">Copia Settimana</button>
+          <button type="button" class="btn btn-default" disabled id="btnPasteWeek">Incolla Settimana</button>
+        </div>
+      </div>
 
-    <div align="center" class="footer">
-      <br/>
-      Copyright &copy; {{copyright_date}} Andrea Micheli
-    </div>
+      <hr>
 
+      <footer>
+        Copyright &copy; {{copyright_date}} Andrea Micheli
+      </footer>
+    </div><!-- /.container -->
     <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="new_dialog" tabindex="-1" role="dialog" aria-labelledby="new_dialog_title">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Nuova Attivit&agrave;</h4>
+            <h4 class="modal-title" id="new_dialog_title">Nuova Attivit&agrave;</h4>
           </div>
           <div class="modal-body">
             <select id="modalActivity" class="selectpicker">
@@ -64,17 +68,7 @@
               <option value="{{wp[0]}}|{{wp[1]}}">{{wp[0]}}</option>
               {% endfor %}
             </select>
-
-            <div class="input-group bootstrap-timepicker timepicker">
-	      <input id="tp_start" type="text" value="00:00" class="form-control input-small">
-	      <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
-	    </div>
-
-            <div class="input-group bootstrap-timepicker timepicker">
-	      <input id="tp_end" type="text" value="00:00" class="form-control input-small">
-	      <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
-	    </div>
-
+            <button type="button" class="btn btn-danger" id="modalDelete">Elimina</button>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Annulla</button>
