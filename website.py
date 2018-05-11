@@ -8,6 +8,7 @@ from flask import Flask, render_template, send_file
 from flask_sqlalchemy import SQLAlchemy
 
 from report import HourReport, build_pdf_report
+from utils import requires_auth
 
 app = Flask(__name__)
 wd = os.path.dirname(os.path.realpath(__file__))
@@ -33,6 +34,7 @@ if not os.path.exists(dbpath):
 
 
 @app.route('/')
+@requires_auth
 def index():
     workplaces = WorkPlace.query.all()
     work_periods = WorkPeriod.query.all()
@@ -45,6 +47,7 @@ def index():
                            work_periods=work_periods)
 
 @app.route('/newperiod/<int:start>/<int:end>/<string:workplace>')
+@requires_auth
 def new_period(start, end, workplace):
     p = WorkPeriod(start=datetime.fromtimestamp(start),
                    end=datetime.fromtimestamp(end),
@@ -54,6 +57,7 @@ def new_period(start, end, workplace):
     return str(p.id)
 
 @app.route('/newworkplace/<string:name>/<string:color>')
+@requires_auth
 def new_workplace(name, color):
     p = WorkPlace(name=name, color=color)
     db.session.add(p)
@@ -61,6 +65,7 @@ def new_workplace(name, color):
     return 'OK'
 
 @app.route('/chperiod/<int:id_>/<int:start>/<int:end>')
+@requires_auth
 def change_period(id_, start, end):
     p = WorkPeriod.query.filter_by(id=id_).first()
     p.start = datetime.fromtimestamp(start)
@@ -70,6 +75,7 @@ def change_period(id_, start, end):
     return "OK"
 
 @app.route('/editperiod/<int:id_>/<int:start>/<int:end>/<string:workplace>')
+@requires_auth
 def edit_period(id_, start, end, workplace):
     p = WorkPeriod.query.filter_by(id=id_).first()
     p.start = datetime.fromtimestamp(start)
@@ -80,6 +86,7 @@ def edit_period(id_, start, end, workplace):
     return "OK"
 
 @app.route('/rmperiod/<int:id_>')
+@requires_auth
 def remove_period(id_):
     p = WorkPeriod.query.filter_by(id=id_).first()
     db.session.delete(p)
@@ -87,6 +94,7 @@ def remove_period(id_):
     return "OK"
 
 @app.route('/get_pdf_report/<int:date>')
+@requires_auth
 def get_pdf_report(date):
     date = datetime.fromtimestamp(date)
     hr = HourReport(date.month, date.year)
