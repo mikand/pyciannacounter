@@ -34,10 +34,45 @@ $(document).ready(function() {
         });
     });
 
+    $("#btnPdfReport").click(function() {
+        week = $('#calendar').fullCalendar('getDate');
+        window.open("/get_pdf_report/"+week.unix(), '_blank');
+    });
+
+    $("#btnOptions").click(function() {
+        $('#optionsDialog').modal();
+    });
+
+    $("#btnAddWorkPlace").click(function() {
+        name = $('#wpName').val();
+        color = $('#wpColor').val();
+        $.get("/newworkplace/"+name+"/"+color,
+              function(data) {
+                  if (data == 'OK') {
+                      $('#lstWorkPlaces').append('<li class="list-group-item"><span style="color:'+color+';font-weight:bold">'+name+'<span></li>');
+                      $('#modalActivity').append($('<option>', {
+                          value: name+'|'+color,
+                          text: name
+                      }));
+                      $('#modalActivity').selectpicker('refresh');
+                      $('#wpName').val('');
+                      $('#wpColor').val('');
+                  }
+              });
+    });
+
+
     var currentEvent = null;
 
     $("#modalDelete").click(function() {
-        alert("TODO!");
+        $.get("/rmperiod/"+currentEvent.id,
+              function(data) {
+                  if (data == 'OK') {
+                      $("#calendar").fullCalendar('removeEvents', currentEvent.id);
+                  }
+                  currentEvent = null;
+                  $('#eventDialog').modal('hide');
+              });
     });
 
     $("#modalConfirm").click(function() {
@@ -50,7 +85,7 @@ $(document).ready(function() {
                       currentEvent.id = data;
                       $('#calendar').fullCalendar('renderEvent', currentEvent, true);
                       currentEvent = null;
-                      $('#new_dialog').modal('hide');
+                      $('#eventDialog').modal('hide');
                   });
         }
         else {
@@ -62,7 +97,7 @@ $(document).ready(function() {
                       else {
                           $('#calendar').fullCalendar('updateEvent', currentEvent);
                           currentEvent = null;
-                          $('#new_dialog').modal('hide');
+                          $('#eventDialog').modal('hide');
                       }
                   });
         }
@@ -86,8 +121,9 @@ $(document).ready(function() {
                 id: "__NEW_EVENT",
                 backgroundColor: null
             };
-            $('#new_dialog_title').html("Nuova Attivit&agrave;");
-            $('#new_dialog').modal();
+            $('#eventDialogTitle').html("Nuova Attivit&agrave;");
+            $('#modalDelete').hide();
+            $('#eventDialog').modal();
         },
         header: {
 	    left: 'prev,next today',
@@ -110,12 +146,12 @@ $(document).ready(function() {
         //        height: 650,
         eventClick: function(event) {
             currentEvent = event;
-            $('#new_dialog_title').html("Modifica Attivit&agrave;");
-
+            $('#eventDialogTitle').html("Modifica Attivit&agrave;");
+            $('#modalDelete').show();
             var value = event.title + "|" + event.backgroundColor;
             $("#modalActivity").val(value).change();;
 
-            $('#new_dialog').modal();
+            $('#eventDialog').modal();
         },
         eventDrop: function(event, delta, revertFunc) {
             $.get("/chperiod/"+event.id+"/"+event.start.unix()+"/"+event.end.unix(),
