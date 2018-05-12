@@ -31,7 +31,7 @@ def hour(h, m):
     return '%d:%s' % (h, sm)
 
 def get_hm(mins):
-    return mins // 60, mins % 60
+    return "%.2f" % (mins / 60)
 
 def build_pdf_report(report):
     styleSheet = getSampleStyleSheet()
@@ -59,7 +59,7 @@ def build_pdf_report(report):
         return res
 
     def build_table():
-        first_day, ndays = calendar.monthrange(2018, 1)
+        first_day, ndays = calendar.monthrange(report.year, report.month)
         data= build_header(report)
 
         wd = first_day
@@ -78,20 +78,19 @@ def build_pdf_report(report):
                 else:
                     (sh, sm, eh, em) = wt
                     wm = ((eh - sh) * 60) + (em - sm)
-                    dh, dm = get_hm(wm)
-                    r += [hour(sh, sm), hour(eh, em), hour(dh, dm)]
+                    r += [hour(sh, sm), hour(eh, em), get_hm(wm)]
                     total_minutes_today += wm
 
             total_minutes += total_minutes_today
             r.append('')
-            r.append(hour(*get_hm(total_minutes_today)))
+            r.append(get_hm(total_minutes_today))
 
             data.append(r)
 
         r = [''] * (3*len(report.workplaces) + 4)
         data.append(list(r))
         r[0] = "Totale del mese:"
-        r[-1] = hour(*get_hm(total_minutes))
+        r[-1] = get_hm(total_minutes)
         data.append(r)
 
         style = [('SPAN', (0,0), (1,1)),
