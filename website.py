@@ -107,6 +107,7 @@ def get_pdf_report(date):
             hr.workplaces.append(p)
         hr.worked_hours.append((day, p, wp.start.hour, wp.start.minute, wp.end.hour, wp.end.minute))
 
+    hr.workplaces.sort()
     pdf_out = build_pdf_report(hr)
     return send_file(pdf_out,
                      attachment_filename='%d_%d_Foglio_Ore_Gianna.pdf' % (date.month, date.year),

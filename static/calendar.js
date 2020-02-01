@@ -107,11 +107,11 @@ $(document).ready(function() {
         locale: 'it',
         allDaySlot: false,
         weekends: false,
-        minTime: "15:00:00",
-        maxTime: "23:00:00",
+        minTime: "12:00:00",
+        maxTime: "22:00:00",
         selectable: true,
         slotDuration: "00:15:00",
-        timezone: 'local',
+        timezone: 'UTC',
         select: function(start, end, jsEvent, view) {
             currentEvent = {
                 title : null,

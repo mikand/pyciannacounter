@@ -18,11 +18,34 @@ class HourReport(object):
         self.workplaces = []
         self.worked_hours = []
 
+    @property
+    def vacations(self):
+        return [w for w in self.workplaces if ('ferie' in w.lower() or 'permesso' in w.lower())]
+
+    @property
+    def illnesses(self):
+        return [w for w in self.workplaces if 'malattia' in w.lower()]
+
+    @property
+    def real_workplaces(self):
+        return [w for w in self.workplaces if w not in (self.vacations + self.illnesses)]
+
     def get_worked_hours(self, day, workplace):
+        if workplace not in (self.vacations + self.illnesses):
+            for f in self.vacations:
+                wh = self.get_worked_hours(day, f)
+                if wh is not None:
+                    return 'FERIE'
+            for f in self.illnesses:
+                wh = self.get_worked_hours(day, f)
+                if wh is not None:
+                    return 'MALATTIA'
+                
         for (d, p, sh, sm, eh, em) in self.worked_hours:
             if d == day and p == workplace:
                 return (sh, sm, eh, em)
         return None
+
 
 def hour(h, m):
     sm = str(m)
@@ -33,7 +56,7 @@ def hour(h, m):
 def get_hm(mins):
     return "%.2f" % (mins / 60)
 
-def build_pdf_report(report):
+def build_pdf_report(report, show_hours=False):
     styleSheet = getSampleStyleSheet()
 
     def center(s, bold=False):
@@ -51,7 +74,7 @@ def build_pdf_report(report):
 
     def build_header(report):
         res = [['Giorno', ''], ['', '']]
-        for wp in report.workplaces:
+        for wp in report.real_workplaces:
             res[0] += [wp, '', '']
             res[1] += ['Orario', '', 'Tot. Ore']
         res[0] += ['', 'Tot.']
@@ -71,23 +94,39 @@ def build_pdf_report(report):
 
             total_minutes_today = 0
 
-            for wp in report.workplaces:
+            for wp in report.real_workplaces:
                 wt = report.get_worked_hours(d, wp)
                 if wt is None:
+                    r += ['', '', '']
+                elif wt == 'FERIE':
+                    r += ['', '', '']
+                elif wt == 'MALATTIA':
                     r += ['', '', '']
                 else:
                     (sh, sm, eh, em) = wt
                     wm = ((eh - sh) * 60) + (em - sm)
-                    r += [hour(sh, sm), hour(eh, em), get_hm(wm)]
+                    if show_hours:
+                        r += [hour(sh, sm), hour(eh, em), get_hm(wm)]
+                    else:
+                        r += ['', '', get_hm(wm)]
                     total_minutes_today += wm
 
-            total_minutes += total_minutes_today
+            vacation = False
             r.append('')
-            r.append(get_hm(total_minutes_today))
+            for wp in report.vacations + report.illnesses:
+                wt = report.get_worked_hours(d, wp)
+                if wt is not None:
+                    r.append(wp)
+                    vacation = True
+                    break
+                    
+            if not vacation:
+                total_minutes += total_minutes_today
+                r.append(get_hm(total_minutes_today))
 
             data.append(r)
 
-        r = [''] * (3*len(report.workplaces) + 4)
+        r = [''] * (3*len(report.real_workplaces) + 4)
         data.append(list(r))
         r[0] = "Totale del mese:"
         r[-1] = get_hm(total_minutes)
@@ -119,7 +158,7 @@ def build_pdf_report(report):
                  ('BOX',(-1,-1), (-1, -1), 2, colors.black),
         ]
         idx = 2
-        for _ in report.workplaces:
+        for wp in report.real_workplaces:
             style.append(('SPAN', (idx,0), (idx+2,0)))
             style.append(('SPAN', (idx,1), (idx+1,1)))
             style.append(('GRID',(idx,0),(idx-1,-3), 1.5, colors.black))

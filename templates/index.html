@@ -12,7 +12,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
     <!-- fullcalendar -->
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.8.0/fullcalendar.css' />
+    <link rel='stylesheet' href='{{url_for('static', filename='fullcalendar.css')}}' />
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.8.0/fullcalendar.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.8.0/locale/it.js'></script>
@@ -29,8 +29,8 @@
       {%for wp in work_periods%}
       {
         title : '{{wp.workplace}}',
-        start : '{{wp.start}}',
-        end : '{{wp.end}}',
+        start : moment.unix({{wp.start.timestamp()}}),
+        end : moment.unix({{wp.end.timestamp()}}),
         allDay: false,
         id: {{wp.id}},
         backgroundColor: '{{workplaces[wp.workplace]}}'
