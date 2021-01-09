@@ -39,6 +39,11 @@ $(document).ready(function() {
         window.open("/get_pdf_report/"+week.unix(), '_blank');
     });
 
+    $("#btnWeekPdfReport").click(function() {
+        week = $('#calendar').fullCalendar('getDate');
+        window.open("/get_week_pdf_report/"+week.unix(), '_blank');
+    });
+
     $("#btnOptions").click(function() {
         $('#optionsDialog').modal();
     });

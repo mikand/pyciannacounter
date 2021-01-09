@@ -1,7 +1,8 @@
 import io
 
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import landscape, A4, cm
+from reportlab.lib.units import cm
+from reportlab.lib.pagesizes import landscape, A4
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
@@ -40,7 +41,7 @@ class HourReport(object):
                 wh = self.get_worked_hours(day, f)
                 if wh is not None:
                     return 'MALATTIA'
-                
+
         for (d, p, sh, sm, eh, em) in self.worked_hours:
             if d == day and p == workplace:
                 return (sh, sm, eh, em)
@@ -119,7 +120,7 @@ def build_pdf_report(report, show_hours=False):
                     r.append(wp)
                     vacation = True
                     break
-                    
+
             if not vacation:
                 total_minutes += total_minutes_today
                 r.append(get_hm(total_minutes_today))

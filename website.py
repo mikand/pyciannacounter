@@ -2,7 +2,7 @@ import time
 import os
 
 from datetime import datetime
-from sqlalchemy import extract, and_
+from sqlalchemy import extract, and_, func
 
 from flask import Flask, render_template, send_file
 from flask_sqlalchemy import SQLAlchemy
@@ -112,6 +112,28 @@ def get_pdf_report(date):
     return send_file(pdf_out,
                      attachment_filename='%d_%d_Foglio_Ore_Gianna.pdf' % (date.month, date.year),
                      mimetype='application/pdf')
+
+@app.route('/get_week_pdf_report/<int:date>')
+@requires_auth
+def get_week_pdf_report(date):
+    date = datetime.fromtimestamp(date)
+    hr = HourReport(date.month, date.year)
+    wps = WorkPeriod.query.filter(and_(((func.strftime('%j', func.date(WorkPeriod.start, '-3 days', 'weekday 4')) - 1) / 7 + 1) <= date.isocalendar()[1], #https://stackoverflow.com/questions/15082584/sqlite-return-wrong-week-number-for-2013
+                                       extract('month', WorkPeriod.start) == date.month,
+                                       extract('year', WorkPeriod.start) == date.year)).all()
+    for wp in wps:
+        day = wp.start.day
+        p = wp.workplace
+        if p not in hr.workplaces:
+            hr.workplaces.append(p)
+        hr.worked_hours.append((day, p, wp.start.hour, wp.start.minute, wp.end.hour, wp.end.minute))
+
+    hr.workplaces.sort()
+    pdf_out = build_pdf_report(hr)
+    return send_file(pdf_out,
+                     attachment_filename='%d_%d_Foglio_Ore_Gianna.pdf' % (date.month, date.year),
+                     mimetype='application/pdf')
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
